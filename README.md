@@ -1,1 +1,1 @@
-# IncomeQualificationCalculator
+# Income Qualifications Calculator
