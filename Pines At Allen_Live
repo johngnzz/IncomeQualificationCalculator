@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Income Qualification Calculator</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f7f8fc;
+        }
+
+        .calculator {
+            background-color: #ffffff;
+            text-align: center;
+            padding: 2rem;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            max-width: 600px;
+            margin: 2rem auto;
+        }
+
+        .result {
+            margin-top: 1rem;
+            font-weight: bold;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        select, input {
+            padding: 10px 15px;
+            margin: 0.5rem 0;
+            border: 1px solid #dcdcdc;
+            border-radius: 5px;
+            width: 90%;
+            box-sizing: border-box;
+            outline: none;
+            transition: border 0.3s;
+        }
+
+        select:focus, input:focus {
+            border: 1px solid #694afc;
+        }
+
+        button {
+            padding: 10px 20px;
+            margin-top: 1rem;
+            background-color: #694afc;
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        button:hover {
+            background-color: #5533d1;
+            transform: scale(1.05);
+        }
+
+        @media (max-width: 600px) {
+            .calculator {
+                padding: 1rem;
+            }
+
+            select, input {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="calculator">
+    <h3>Income Qualification Calculator</h3>
+    <label for="lihtcType">Select Program:</label>
+    <select id="lihtcType">
+        <option value="">Select Program</option>
+        <option value="50">50% LIHTC - Moderate Income</option>
+        <option value="60">60% LIHTC - Moderate Income</option>
+    </select>
+
+    <label for="bedroomType">Apartment Type:</label>
+    <select id="bedroomType" onchange="updateHouseholdSizeOptions()">
+        <option value="">Select Apartment Type</option>
+        <option value="1">1 Bedroom</option>
+        <option value="2">2 Bedroom</option>
+        <option value="3">3 Bedroom</option>
+        <option value="4">4 Bedroom</option>
+    </select>
+
+    <div class="hidden" id="householdSizeDiv">
+        <label for="householdSize">Select Household Size:</label>
+        <select id="householdSize" onchange="showIncomeField()">
+            <option value="">Select Household Size</option>
+        </select>
+    </div>
+
+    <div class="hidden" id="incomeSection">
+        <label for="incomeInput">Enter Your Annual Income:</label>
+        <input type="number" id="incomeInput" placeholder="e.g., 25000">
+    </div>
+
+    <button class="hidden" onclick="calculate()" id="checkButton" data-ga="qualifyCheck">CHECK QUALIFICATION</button>
+
+    <div class="result" id="resultText"></div>
+</div>
+
+<script>
+    const RENTS = {
+        '50': {
+            '1': 642,
+            '2': 762,
+            '3': 872,
+            '4': 963
+        },
+        '60': {
+            '1': 788,
+            '2': 938,
+            '3': 1074,
+            '4': 1189
+        }
+    };
+
+    const MAX_INCOME = {
+        '50': {
+            '1': 27300,
+            '2': 31200,
+            '3': 35100,
+            '4': 38950,
+            '5': 42100,
+            '6': 45200,
+            '7': 48300,
+            '8': 51450
+        },
+        '60': {
+            '1': 32760,
+            '2': 37440,
+            '3': 42120,
+            '4': 46740,
+            '5': 50520,
+            '6': 54240,
+            '7': 57960,
+            '8': 61740
+        }
+    };
+
+    const OCCUPANCY_STANDARDS = {
+        '1': 3,
+        '2': 4,
+        '3': 6,
+        '4': 8
+    };
+
+    function updateHouseholdSizeOptions() {
+        const bedroomType = document.getElementById("bedroomType").value;
+        const maxOccupants = OCCUPANCY_STANDARDS[bedroomType];
+        let optionsHTML = '<option value="">Select Household Size</option>';
+
+        for (let i = 1; i <= maxOccupants; i++) {
+            optionsHTML += `<option value="${i}">${i} Person${i > 1 ? 's' : ''}</option>`;
+        }
+
+        document.getElementById("householdSize").innerHTML = optionsHTML;
+        document.getElementById("householdSizeDiv").classList.remove("hidden");
+    }
+
+    function showIncomeField() {
+        const householdSize = document.getElementById("householdSize").value;
+        if (householdSize) {
+            document.getElementById("incomeSection").classList.remove("hidden");
+            document.getElementById("checkButton").classList.remove("hidden");
+        } else {
+            document.getElementById("incomeSection").classList.add("hidden");
+            document.getElementById("checkButton").classList.add("hidden");
+        }
+    }
+
+    function calculate() {
+        const lihtcType = document.getElementById("lihtcType").value;
+        const bedroomType = document.getElementById("bedroomType").value;
+        const householdSize = document.getElementById("householdSize").value;
+        const income = parseFloat(document.getElementById("incomeInput").value);
+
+        const netRent = RENTS[lihtcType][bedroomType];
+        const requiredIncome = netRent * 12 * 2.5;
+        const maxAllowedIncome = MAX_INCOME[lihtcType][householdSize];
+
+        const resultText = document.getElementById("resultText");
+        if (income >= requiredIncome && income <= maxAllowedIncome) {
+            resultText.innerText = "You may qualify based on your income!";
+            resultText.style.color = "green";
+        } else if (income < requiredIncome) {
+            resultText.innerText = `Your income is below the required minimum of $${requiredIncome.toFixed(2)} per year.`;
+            resultText.style.color = "red";
+        } else {
+            resultText.innerText = `Your income exceeds the maximum allowed of $${maxAllowedIncome} per year for a household of ${householdSize} persons.`;
+            resultText.style.color = "red";
+        }
+
+        const event = new Event('income_qualification_check');
+        document.dispatchEvent(event);
+        console.log("Dispatching the income_qualification_check event");
+    }
+
+    document.getElementById('checkButton').addEventListener('click', function() {
+        gtag('event', 'qualify_button_click');
+        console.log("GA4 Event triggered: qualify_button_click");
+    });
+</script>
+</body>
+</html>
