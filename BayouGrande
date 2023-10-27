@@ -79,8 +79,8 @@
     <label for="lihtcType">Select Program:</label>
     <select id="lihtcType">
         <option value="">Select Program</option>
-        <option value="50">50% LIHTC - Moderate Income</option>
-        <option value="60">60% LIHTC - Moderate Income</option>
+        <option value="50">50% LIHTC - Moderate Income - Bayou Grande Ph III</option>
+        <option value="60">60% LIHTC - Moderate Income - Bayou Grande Ph III</option>
     </select>
 
     <label for="bedroomType">Apartment Type:</label>
