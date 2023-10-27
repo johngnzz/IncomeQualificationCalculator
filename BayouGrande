@@ -187,7 +187,7 @@
 
         const resultText = document.getElementById("resultText");
         if (income >= requiredIncome && income <= maxAllowedIncome) {
-            resultText.innerText = "You may qualify based on your income!";
+            resultText.innerText = "You might qualify based on your income!";
             resultText.style.color = "green";
         } else if (income < requiredIncome) {
             resultText.innerText = `Your income is below the required minimum of $${requiredIncome.toFixed(2)} per year.`;
