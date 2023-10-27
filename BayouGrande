@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Income Qualification Calculator</title>
+    <style>
+ body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f7f8fc;
+        }
+
+        .calculator {
+            background-color: #ffffff;
+            text-align: center;
+            padding: 2rem;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            max-width: 600px;
+            margin: 2rem auto;
+        }
+
+        .result {
+            margin-top: 1rem;
+            font-weight: bold;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        select, input {
+            padding: 10px 15px;
+            margin: 0.5rem 0;
+            border: 1px solid #dcdcdc;
+            border-radius: 5px;
+            width: 90%;
+            box-sizing: border-box;
+            outline: none;
+            transition: border 0.3s;
+        }
+
+        select:focus, input:focus {
+            border: 1px solid #694afc;
+        }
+
+        button {
+            padding: 10px 20px;
+            margin-top: 1rem;
+            background-color: #694afc;
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        button:hover {
+            background-color: #5533d1;
+            transform: scale(1.05);
+        }
+
+        @media (max-width: 600px) {
+            .calculator {
+                padding: 1rem;
+            }
+
+            select, input {
+                width: 100%;
+            }
+        }    </style>
+</head>
+<body>
+<div class="calculator">
+    <h3>Income Qualification Calculator</h3>
+    
+    <!-- LIHTC Program dropdown -->
+    <label for="lihtcType">Select Program:</label>
+    <select id="lihtcType">
+        <option value="">Select Program</option>
+        <option value="50">50% LIHTC - Moderate Income</option>
+        <option value="60">60% LIHTC - Moderate Income</option>
+    </select>
+
+    <!-- Apartment Type dropdown -->
+    <label for="bedroomType">Apartment Type:</label>
+    <select id="bedroomType" onchange="updateHouseholdSizeOptions()">
+        <option value="">Select Apartment Type</option>
+        <option value="1">1 Bedroom</option>
+        <option value="2">2 Bedroom</option>
+        <option value="3">3 Bedroom</option>
+    </select>
+
+    <!-- Household Size dropdown -->
+    <div class="hidden" id="householdSizeDiv">
+        <label for="householdSize">Select Household Size:</label>
+        <select id="householdSize" onchange="showIncomeField()">
+            <option value="">Select Household Size</option>
+        </select>
+    </div>
+
+    <!-- Annual Income input -->
+    <div class="hidden" id="incomeSection">
+        <label for="incomeInput">Enter Your Annual Income:</label>
+        <input type="number" id="incomeInput" placeholder="e.g., 25000">
+    </div>
+
+    <!-- Check Qualification button -->
+    <button class="hidden" onclick="calculate()" id="checkButton">CHECK QUALIFICATION</button>
+
+    <!-- Result section -->
+    <div class="result" id="resultText"></div>
+</div>
+
+<script>
+    const RENTS = {
+        '50': {
+            '1': 780,
+            '2': 935,
+            '3': 1081
+        },
+        '60': {
+            '1': 780,
+            '2': 935,
+            '3': 1081
+        }
+    };
+
+    const MAX_INCOME = {
+        '50': {
+            '1': 25000,
+            '2': 30000,
+            '3': 35000
+        },
+        '60': {
+            '1': 30000,
+            '2': 35000,
+            '3': 40000
+        }
+    };
+
+    const OCCUPANCY_STANDARDS = {
+        '1': [1, 2],
+        '2': [2, 4],
+        '3': [3, 6]
+    };
+
+    function updateHouseholdSizeOptions() {
+        const bedroomType = document.getElementById("bedroomType").value;
+        const householdSizeDropdown = document.getElementById("householdSize");
+        
+        // Clear previous options
+        householdSizeDropdown.innerHTML = '<option value="">Select Household Size</option>';
+
+        if (bedroomType) {
+            const [min, max] = OCCUPANCY_STANDARDS[bedroomType];
+            for (let i = min; i <= max; i++) {
+                const option = document.createElement("option");
+                option.value = i;
+                option.textContent = i;
+                householdSizeDropdown.appendChild(option);
+            }
+        }
+    }
+
+    function showIncomeField() {
+        const incomeSection = document.getElementById("incomeSection");
+        const checkButton = document.getElementById("checkButton");
+
+        if (document.getElementById("householdSize").value) {
+            incomeSection.classList.remove("hidden");
+            checkButton.classList.remove("hidden");
+        } else {
+            incomeSection.classList.add("hidden");
+            checkButton.classList.add("hidden");
+        }
+    }
+
+    function calculate() {
+        const lihtcType = document.getElementById("lihtcType").value;
+        const bedroomType = document.getElementById("bedroomType").value;
+        const householdSize = document.getElementById("householdSize").value;
+        const income = parseFloat(document.getElementById("incomeInput").value);
+
+        const maxAllowedIncome = MAX_INCOME[lihtcType][bedroomType];
+        const resultText = document.getElementById("resultText");
+
+        if (income <= maxAllowedIncome) {
+            resultText.textContent = "You qualify based on your income!";
+        } else {
+            resultText.textContent = "Sorry, you do not qualify based on your income.";
+        }
+    }
+</script>
+</body>
+</html>
